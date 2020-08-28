@@ -15,12 +15,12 @@
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::error_types::Error as BifrostxtError;
-use codec::Encode;
+use codec::{Decode, Encode};
 use core::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
-	system::{System, SystemEventsDecoder}, Encoded,
+	system::{System, SystemEventsDecoder}, Encoded, Event,
 	sudo::{Sudo, SudoEventsDecoder, SudoCall}
 };
 use sp_core::{sr25519::Pair, Pair as TraitPair};
@@ -58,6 +58,14 @@ pub fn create_sudo_call<'a, T: Sudo>(call: &'a Encoded) -> SudoCall<T> {
 	}
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct IssuedVoucherEvent<T: Voucher> {
+	/// Account voucher was issued to.
+	pub to: <T as System>::AccountId,
+	/// Amount of voucher that was issued.
+	pub amount: T::Balance,
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Vouchers {
 	#[serde(skip)]
@@ -75,14 +83,27 @@ pub async fn issue_voucher_call(signer: &str, url: &str, voucher: &Vouchers) -> 
 	let signer = Pair::from_string(signer, None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
 	let signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
 
+	let amount = {
+		let amount_f64 = voucher.amount.parse::<f64>()?;
+		(amount_f64 * 10f64.powi(12i32)) as u128
+	};
+
 	let args = IssueVoucherCall {
 		dest: &voucher.account.clone().into(),
-		amount: 3000u128,
+		amount,
 	};
 	let proposal = client.encode(args)?;
 	let call = create_sudo_call(&proposal);
 
-	let block_hash = client.submit(call, &signer).await?;
+	let extrinsic = client.create_signed(call, &signer).await?;
+
+	let mut decoder = client.events_decoder::<IssueVoucherCall<BifrostRuntime>>();
+	decoder.with_voucher();
+
+	let voucher_events = client.submit_and_watch_extrinsic(extrinsic, decoder).await?;
+	let event = voucher_events.find_event::<IssuedVoucherEvent::<BifrostRuntime>>()?.ok_or("No Event found or decoded.")?;
+	println!("event: {:?}", event);
+	let block_hash = voucher_events.block;
 
 	Ok(block_hash.to_string())
 }

@@ -1,5 +1,5 @@
 {
-  "version": 40,
+  "version": 54,
   "producers": [{
     "producer_name": "alohaeostest",
     "authority": [
@@ -19,54 +19,6 @@
         "threshold": 1,
         "keys": [{
           "key": "EOS7pfLMz45bKTVqVMfnxktqi6RYjDV46C82Q5eE8NZHM9Nnsai6T",
-          "weight": 1
-        }
-        ]
-      }
-    ]
-  },{
-    "producer_name": "batinthedark",
-    "authority": [
-      0,{
-        "threshold": 1,
-        "keys": [{
-          "key": "EOS6dwoM8XGMQn49LokUcLiony7JDkbHrsFDvh5svLvPDkXtvM7oR",
-          "weight": 1
-        }
-        ]
-      }
-    ]
-  },{
-    "producer_name": "bighornsheep",
-    "authority": [
-      0,{
-        "threshold": 1,
-        "keys": [{
-          "key": "EOS5xfwWr4UumKm4PqUGnyCrFWYo6j5cLioNGg5yf4GgcTp2WcYxf",
-          "weight": 1
-        }
-        ]
-      }
-    ]
-  },{
-    "producer_name": "bigpolarbear",
-    "authority": [
-      0,{
-        "threshold": 1,
-        "keys": [{
-          "key": "EOS6oZi9WjXUcLionUtSiKRa4iwCW5cT6oTzoWZdENXq1p2pq53Nv",
-          "weight": 1
-        }
-        ]
-      }
-    ]
-  },{
-    "producer_name": "clevermonkey",
-    "authority": [
-      0,{
-        "threshold": 1,
-        "keys": [{
-          "key": "EOS5mp5wmRyL5RH2JUeEh3eoZxkJ2ZZJ9PVd1BcLioNuq4PRCZYxQ",
           "weight": 1
         }
         ]
@@ -97,12 +49,48 @@
       }
     ]
   },{
+    "producer_name": "eoscannonchn",
+    "authority": [
+      0,{
+        "threshold": 1,
+        "keys": [{
+          "key": "EOS6wYgqxWhdAQDNbaEkem7TCQMQjrwUw9wWNnEtDgRnvDhXSFYfe",
+          "weight": 1
+        }
+        ]
+      }
+    ]
+  },{
+    "producer_name": "eoscostarica",
+    "authority": [
+      0,{
+        "threshold": 1,
+        "keys": [{
+          "key": "EOS6R46x4P8b82D4zjpU62xZG3ytn6VUxcyuJntSxSwMLXAgLxcU8",
+          "weight": 1
+        }
+        ]
+      }
+    ]
+  },{
     "producer_name": "eosdacserval",
     "authority": [
       0,{
         "threshold": 1,
         "keys": [{
           "key": "EOS5CJJEKDms9UTS7XBv8rb33BENRpnpSGsQkAe6bCfpjHHCKQTgH",
+          "weight": 1
+        }
+        ]
+      }
+    ]
+  },{
+    "producer_name": "eosiodetroit",
+    "authority": [
+      0,{
+        "threshold": 1,
+        "keys": [{
+          "key": "EOS5AMHVLxbgx3LCcM4jZvYr1hjrDmwrARy6mYmLnCJYbURMahq5a",
           "weight": 1
         }
         ]
@@ -133,12 +121,12 @@
       }
     ]
   },{
-    "producer_name": "funnyhamster",
+    "producer_name": "eosriobrazil",
     "authority": [
       0,{
         "threshold": 1,
         "keys": [{
-          "key": "EOS7A9BoRetjpKtE3sqA6HRykRJ955MjQ5XdRmCLionVte2uERL8h",
+          "key": "EOS8iv6QXxZ5rN1xz3rSH6q2hekjyeYEiJcS84G1i9ZGu6JumunSR",
           "weight": 1
         }
         ]
@@ -151,18 +139,6 @@
         "threshold": 1,
         "keys": [{
           "key": "EOS8X5NCx1Xqa1xgQgBa9s6EK7M1SjGaDreAcLion4kDVLsjhQr9n",
-          "weight": 1
-        }
-        ]
-      }
-    ]
-  },{
-    "producer_name": "hippopotamus",
-    "authority": [
-      0,{
-        "threshold": 1,
-        "keys": [{
-          "key": "EOS7qDcxm8YtAZUA3t9kxNGuzpCLioNnzpTRigi5Dwsfnszckobwc",
           "weight": 1
         }
         ]
@@ -205,18 +181,6 @@
       }
     ]
   },{
-    "producer_name": "jumpingfrogs",
-    "authority": [
-      0,{
-        "threshold": 1,
-        "keys": [{
-          "key": "EOS7oVWG413cLioNG7RU5Kv7NrPZovAdRSP6GZEG4LFUDWkgwNXHW",
-          "weight": 1
-        }
-        ]
-      }
-    ]
-  },{
     "producer_name": "junglesweden",
     "authority": [
       0,{
@@ -247,6 +211,42 @@
         "threshold": 1,
         "keys": [{
           "key": "EOS7tigERwXDRuHsok212UDToxFS1joUhAxzvDUhRof8NjuvwtoHX",
+          "weight": 1
+        }
+        ]
+      }
+    ]
+  },{
+    "producer_name": "ssssssssnake",
+    "authority": [
+      0,{
+        "threshold": 1,
+        "keys": [{
+          "key": "EOS8SDhZ5CLioNLie9mb7kDu1gHfDXLwTvYBSxR1ccYSJERvutLqG",
+          "weight": 1
+        }
+        ]
+      }
+    ]
+  },{
+    "producer_name": "teamgreymass",
+    "authority": [
+      0,{
+        "threshold": 1,
+        "keys": [{
+          "key": "EOS5w2WYgoiFT41Ad3Ax1ZkD47D4qriGaRXRsXmkFuC1hKwjbrXe3",
+          "weight": 1
+        }
+        ]
+      }
+    ]
+  },{
+    "producer_name": "thebluewhale",
+    "authority": [
+      0,{
+        "threshold": 1,
+        "keys": [{
+          "key": "EOS6Wfo1wwTPzzBVT8fe3jpz8vxCnf77YscLionBnw39iGzFWokZm",
           "weight": 1
         }
         ]
