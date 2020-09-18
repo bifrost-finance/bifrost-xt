@@ -19,14 +19,17 @@ mod producers_schedule;
 mod voucher;
 mod utils;
 mod assets;
-//mod batch_trades;
+mod batch_trades;
 
 use codec::{Decode, Encode};
 use std::error::Error;
 use std::str::FromStr;
 use std::{thread, time};
 use sp_runtime::AccountId32;
-use crate::voucher::{issue_voucher_call, Vouchers};
+use crate::voucher::{issue_voucher_call, CC2Voucher};
+use crate::voucher::IssueVoucherCall;
+use crate::assets::{TokenSymbol, IssueCall};
+use crate::batch_trades::batch_calls;
 
 #[derive(Clone, Debug)]
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -40,20 +43,54 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let url = "ws://127.0.0.1:9944";
     let signer = "//Alice";
 
-    let alice_voucher = r#"{
-        "nickname": "jdeng",
-        "u_id": 2,
-        "amount": "10",
-        "account": "gXCcrjjFX3RPyhHYgwZDmw8oe4JFpd5anko3nTY8VrmnJpe"
-    }"#;
+    let cc2_bnc = "/Volumes/Bifrost/my-repo/bifrost-xt/src/data/AsgardCC2BNC.json";
+    let json = utils::read_json_from_file(cc2_bnc)?;
+    let cc2_voucher: Vec<CC2Voucher> = serde_json::from_str(&json)?;
+    let mut index = 0u32;
+    let mut sum = 0.0f64;
+//    let _ = voucher::get_all_voucher(signer, url).await?;
+//    for voucher in cc2_voucher.iter() {
+//        if voucher.address.eq(&String::new()) {
+//            continue;
+//        }
+//        index += 1;
+//
+////        println!("before {:?} received block hash", voucher.address);
+//
+//        let amount_f64 = voucher.bnc.parse::<f64>()?;
+//        sum += amount_f64;
+//
+//        let who = AccountId32::from_str(&voucher.address).unwrap();
+//        let block_hash = issue_voucher_call(signer, url, &voucher, &who).await;
+//        match block_hash {
+////            Ok(block_hash) => println!("{:?} received block hash: {:?}", voucher.address, block_hash),
+//            Ok(block_hash) => println!("{:?} received block hash: {:?}", voucher.address, block_hash),
+//            Err(e) => {
+//                println!("{:?} received block hash with error: {:?}", voucher.address, e);
+//            }
+//        }
+//    }
+//    dbg!(index);
+//    println!("all bnc sent: {:?}", sum);
 
-    let v: Vouchers =  serde_json::from_str(&alice_voucher)?;
-    let block_hash = issue_voucher_call(signer, url, &v).await?;
-    println!("block hash: {:?}", block_hash);
-
-    let schedule = "/Volumes/Bifrost 1/my-repo/bifrost-xt/src/data/producer_authority_schedule_v2-55.json";
-
-    let veos_issued = "/Users/liebi/my-repo/bifrost-peers-status/missed_trx_history_latest.json";
+//    let veos_issued = "/Users/liebi/my-repo/bifrost-peers-status/missed_trx_history_latest.json";
+//
+//    let who = AccountId32::from_str("5G9VdMwXvzza9pS8qE8ZHJk3CheHW9uucBn9ngW4C1gmmzpv").unwrap();
+//    let voucher_call = IssueVoucherCall::<subxt::DefaultNodeRuntime> {
+//        dest: &who.clone().into(),
+//        amount: 100,
+//    };
+//
+//    let assets_call = IssueCall::<subxt::DefaultNodeRuntime> {
+//        token_symbol: TokenSymbol::vEOS,
+//        target: &who.clone().into(),
+//        amount: 100,
+//    };
+//    let calls: Vec<Box<dyn subxt::Call<_>>> = vec![Box::new(voucher_call), Box::new(assets_call)];
+//    let calls: Vec<IssueCall<subxt::DefaultNodeRuntime>> = vec![assets_call];
+//    let calls: Vec<IssueCall<_>> = vec![assets_call];
+//
+//    let hash = batch_calls(calls.into_iter(), url, signer).await?;
 //    let json = utils::read_json_from_file(veos_issued)?;
 //    let veos: Vec<IssueVEOS> = serde_json::from_str(&json)?;
 
@@ -82,9 +119,10 @@ async fn main() -> Result<(), Box<dyn Error>>{
 //    let target = AccountId32::from_str("5G9VdMwXvzza9pS8qE8ZHJk3CheHW9uucBn9ngW4C1gmmzpv").unwrap();
 //    let r = assets::issue_assets(signer, url, target, 1020 * 10u128.pow(12u32)).await;
 //    dbg!(r);
-//    let block_hash = producers_schedule::save_producer_schedule_call(signer, url, schedule).await?;
+    let schedule = "/Volumes/Bifrost/my-repo/bifrost-xt/src/data/producer_authority_schedule_v2-55.json";
+    let block_hash = producers_schedule::save_producer_schedule_call(signer, url, schedule).await?;
 //    let block_hash = producers_schedule::test_random_nonce().await?;
-//    println!("block hash: {:?}", block_hash);
+    println!("block hash: {:?}", block_hash);
 
 //    let client = batch_trades::create_client(
 //        "wss://n1.testnet.liebi.com"

@@ -20,7 +20,7 @@ use core::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
-	system::{System, SystemEventsDecoder}, Encoded, Event,
+	system::{AccountStoreExt, System, SystemEventsDecoder}, Encoded, Event, Store,
 	sudo::{Sudo, SudoEventsDecoder, SudoCall}
 };
 use sp_core::{sr25519::Pair, Pair as TraitPair};
@@ -58,6 +58,13 @@ pub fn create_sudo_call<'a, T: Sudo>(call: &'a Encoded) -> SudoCall<T> {
 	}
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Store, Encode)]
+pub struct BalancesVoucherStore<'a, T: Voucher> {
+	#[store(returns = T::Balance)]
+	/// according account to get voucher
+	pub account_id: &'a T::AccountId,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
 pub struct IssuedVoucherEvent<T: Voucher> {
 	/// Account voucher was issued to.
@@ -76,20 +83,30 @@ pub struct Vouchers {
 	pub account: AccountId32,
 }
 
+#[derive(Clone, Debug)]
+#[derive(serde::Deserialize, serde::Serialize)]
+pub struct CC2Voucher {
+	#[serde(skip_serializing_if = "String::is_empty")]
+	pub address: String,
+	pub bnc: String,
+}
+
 #[allow(dead_code)]
-pub async fn issue_voucher_call(signer: &str, url: &str, voucher: &Vouchers) -> Result<String, Box<dyn Error>> {
+pub async fn issue_voucher_call(signer: &str, url: &str, voucher: &CC2Voucher, who: &AccountId32) -> Result<String, Box<dyn Error>> {
 	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
 
 	let signer = Pair::from_string(signer, None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
-	let signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
+	let mut signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
+
+	let nonce = client.account(&signer.signer().public().into(), None).await?.nonce;
 
 	let amount = {
-		let amount_f64 = voucher.amount.parse::<f64>()?;
+		let amount_f64 = voucher.bnc.parse::<f64>()?;
 		(amount_f64 * 10f64.powi(12i32)) as u128
 	};
 
 	let args = IssueVoucherCall {
-		dest: &voucher.account.clone().into(),
+		dest: &who.clone().into(),
 		amount,
 	};
 	let proposal = client.encode(args)?;
@@ -102,8 +119,40 @@ pub async fn issue_voucher_call(signer: &str, url: &str, voucher: &Vouchers) -> 
 
 	let voucher_events = client.submit_and_watch_extrinsic(extrinsic, decoder).await?;
 	let event = voucher_events.find_event::<IssuedVoucherEvent::<BifrostRuntime>>()?.ok_or("No Event found or decoded.")?;
-	println!("event: {:?}", event);
 	let block_hash = voucher_events.block;
 
 	Ok(block_hash.to_string())
+}
+
+pub async fn get_voucher_by_account(signer: &str, url: &str, who: &AccountId32) -> Result<u128, Box<dyn std::error::Error>> {
+	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
+
+	let signer = Pair::from_string(signer, None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
+	let mut signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
+
+	let voucher = client.balances_voucher(&who.clone().into(), None).await?;
+
+	Ok(voucher)
+}
+
+pub async fn get_all_voucher(signer: &str, url: &str) -> Result<Vec<(AccountId32, u128)>, Box<dyn std::error::Error>> {
+	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
+
+	let signer = Pair::from_string(signer, None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
+	let mut signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
+
+	// None means get all of the storage
+	let mut iter = client.balances_voucher_iter(None).await?;
+
+	let mut all_vouchers: Vec<(AccountId32, u128)> = vec![];
+	while let Some((key, val)) = iter.next().await? {
+		println!("{:?}: {}", key.0, val);
+		println!("{:?}: {}", key.0.len(), val);
+		let who = serde_json::from_slice(key.0.as_slice())?;
+		let voucher = (who, val);
+		all_vouchers.push(voucher);
+	}
+
+	Ok(all_vouchers)
+
 }
