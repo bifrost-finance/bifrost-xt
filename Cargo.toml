@@ -1,6 +1,6 @@
 [package]
 name = "bifrost-xt"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Dengjianping <djptux@gmail.com>"]
 edition = "2018"
 
@@ -17,7 +17,8 @@ serde_json = "1.0"
 sp-core = "2.0.0"
 sp-keyring = "2.0.0"
 sp-runtime= "2.0.0"
-subxt = { version = "0.12", package = "substrate-subxt" }
+#subxt = { version = "0.12", package = "substrate-subxt" }
+subxt = { git = "https://github.com/paritytech/substrate-subxt.git", branch = "master", package = "substrate-subxt" }
 tokio = { version = "0.2.22", features = ["macros", "rt-threaded"] }
 
 [profile.release]
