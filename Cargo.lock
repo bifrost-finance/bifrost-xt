@@ -207,7 +207,7 @@ dependencies = [
  "sp-core 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-keyring 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-runtime 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "substrate-subxt 0.12.0 (git+https://github.com/paritytech/substrate-subxt.git)",
+ "substrate-subxt 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.2.22 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -3258,8 +3258,8 @@ dependencies = [
 
 [[package]]
 name = "substrate-subxt"
-version = "0.12.0"
-source = "git+https://github.com/paritytech/substrate-subxt.git#cd7bb6041b53ab6e33058af21d4f6b20f974aa4f"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "frame-metadata 12.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "frame-support 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -3285,15 +3285,15 @@ dependencies = [
  "sp-std 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-transaction-pool 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sp-version 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "substrate-subxt-proc-macro 0.12.0 (git+https://github.com/paritytech/substrate-subxt.git)",
+ "substrate-subxt-proc-macro 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror 1.0.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "url 2.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "substrate-subxt-proc-macro"
-version = "0.12.0"
-source = "git+https://github.com/paritytech/substrate-subxt.git#cd7bb6041b53ab6e33058af21d4f6b20f974aa4f"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "heck 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro-crate 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -4186,8 +4186,8 @@ dependencies = [
 "checksum strum_macros 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)" = "0054a7df764039a6cd8592b9de84be4bec368ff081d203a7d5371cbfa8e65c81"
 "checksum substrate-bip39 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "bed6646a0159b9935b5d045611560eeef842b78d7adc3ba36f5ca325a13a0236"
 "checksum substrate-prometheus-endpoint 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8d3e361741d066bfc29554b9f1bc8e4ac927eb4bd33dd8bb0486969edd8b0b5a"
-"checksum substrate-subxt 0.12.0 (git+https://github.com/paritytech/substrate-subxt.git)" = "<none>"
-"checksum substrate-subxt-proc-macro 0.12.0 (git+https://github.com/paritytech/substrate-subxt.git)" = "<none>"
+"checksum substrate-subxt 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ed693047c3c907a660aa97a71a30af33cec878316d75df60967d73b673ff4fd3"
+"checksum substrate-subxt-proc-macro 0.13.0 (registry+https://github.com/rust-lang/crates.io-index)" = "74975f373430ec447afaeb2925f2bac77e113733b08263f4df75e0a0e5998090"
 "checksum subtle 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2d67a5a62ba6e01cb2192ff309324cb4875d0c451d55fe2319433abe7a05a8ee"
 "checksum subtle 2.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7c65d530b10ccaeac294f349038a597e435b18fb456aadd0840a623f83b9e941"
 "checksum syn 1.0.38 (registry+https://github.com/rust-lang/crates.io-index)" = "e69abc24912995b3038597a7a593be5053eb0fb44f3cc5beec0deb421790c1f4"
