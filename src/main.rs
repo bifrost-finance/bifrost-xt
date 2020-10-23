@@ -49,10 +49,9 @@ async fn main() -> Result<(), Box<dyn Error>>{
     // let url = "ws://127.0.0.1:9944";
     // let signer = "//Alice";
 
-    let db_path = concat!(env!("CARGO_MANIFEST_DIR"),"/sled/cross-chain");
-    let tree = sled::open(db_path).expect("failed to open sled db");
+    let db_path = concat!("/home","/sled/cross-chain");
 
-    let r = crate::prove_action::prove_action_call(tree, signer, url).await;
+    let r = crate::prove_action::prove_action_call(db_path, signer, url).await;
     println!("error happened while submit transaction: {:?}", r);
 
     Ok(())

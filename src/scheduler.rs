@@ -63,13 +63,8 @@ pub async fn upgrade_runtime(signer: &str, url: &str) -> Result<String, Box<dyn 
 
 	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
 
-	println!("before read");
-	let wasm = include_bytes!("/Users/liebi/node_runtime.compact.wasm");
-	println!("before read");
-	// let contents = String::new();
-	// file.read_to_string(&mut contents)?;
-	// println!("after read");
-	println!("wasm binary: {:?}", wasm[0]);
+	// let wasm = include_bytes!("/Users/liebi/node_runtime.compact.wasm");
+	let wasm = b"123";
 
 	let wasm_args = SetCodeCall {
 		_runtime: PhantomData,

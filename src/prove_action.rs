@@ -12,6 +12,7 @@ use subxt::{
     sudo::{Sudo, SudoEventsDecoder, SudoCall}
 };
 use sp_core::{sr25519::Pair, Pair as TraitPair};
+use std::{thread, time};
 
 #[subxt::module]
 pub trait BridgeEos: System {}
@@ -80,7 +81,7 @@ pub struct ProveActionCall<T: BridgeEos> {
     pub _runtime:         PhantomData<T>,
 }
 
-pub async fn prove_action_call(tree: sled::Db, signer: &str, url: &str) -> Result<(), BifrostXTErr> {
+pub async fn prove_action_call(db_path: &str, signer: &str, url: &str) -> Result<(), BifrostXTErr> {
     let client: Client<BifrostRuntime> = subxt::ClientBuilder::new()
         .set_url(url)
         .build()
@@ -91,8 +92,16 @@ pub async fn prove_action_call(tree: sled::Db, signer: &str, url: &str) -> Resul
         .map_err(|_| BifrostXTErr::WrongSudoSeed)?;
     let signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
 
+    let on_sec = time::Duration::from_secs(1);
 
     loop {
+        thread::sleep(on_sec);
+        let tree = sled::open(db_path);
+        if tree.is_err() {
+            println!("db is open by bifrost-eos-relay node");
+            continue;
+        }
+        let tree = tree.unwrap();
         for item in tree.iter() {
             if let Ok((key, val)) = item {
                 println!("index: {:?}", String::from_utf8(key.as_ref().to_vec()), );
