@@ -78,7 +78,7 @@ pub async fn issue_assets(
 	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
 
 	let args = IssueCall {
-		token_symbol: TokenSymbol::vEOS,
+		token_symbol: TokenSymbol::aUSD,
 		target: &target.clone().into(),
 		amount: amount.into(),
 	};

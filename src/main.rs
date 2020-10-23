@@ -20,6 +20,9 @@ mod voucher;
 mod utils;
 mod assets;
 mod batch_trades;
+mod scheduler;
+mod balances;
+mod prove_action;
 
 use codec::{Decode, Encode};
 use std::error::Error;
@@ -40,105 +43,17 @@ pub struct IssueVEOS {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>>{
-    let url = "ws://127.0.0.1:9944";
+    let url = "wss://n1.testnet.liebi.com";
     let signer = "//Alice";
 
-    let cc2_bnc = "/Volumes/Bifrost/my-repo/bifrost-xt/src/data/AsgardCC2BNC.json";
-    let json = utils::read_json_from_file(cc2_bnc)?;
-    let cc2_voucher: Vec<CC2Voucher> = serde_json::from_str(&json)?;
-    let mut index = 0u32;
-    let mut sum = 0.0f64;
-//    let _ = voucher::get_all_voucher(signer, url).await?;
-//    for voucher in cc2_voucher.iter() {
-//        if voucher.address.eq(&String::new()) {
-//            continue;
-//        }
-//        index += 1;
-//
-////        println!("before {:?} received block hash", voucher.address);
-//
-//        let amount_f64 = voucher.bnc.parse::<f64>()?;
-//        sum += amount_f64;
-//
-//        let who = AccountId32::from_str(&voucher.address).unwrap();
-//        let block_hash = issue_voucher_call(signer, url, &voucher, &who).await;
-//        match block_hash {
-////            Ok(block_hash) => println!("{:?} received block hash: {:?}", voucher.address, block_hash),
-//            Ok(block_hash) => println!("{:?} received block hash: {:?}", voucher.address, block_hash),
-//            Err(e) => {
-//                println!("{:?} received block hash with error: {:?}", voucher.address, e);
-//            }
-//        }
-//    }
-//    dbg!(index);
-//    println!("all bnc sent: {:?}", sum);
+    // let url = "ws://127.0.0.1:9944";
+    // let signer = "//Alice";
 
-//    let veos_issued = "/Users/liebi/my-repo/bifrost-peers-status/missed_trx_history_latest.json";
-//
-//    let who = AccountId32::from_str("5G9VdMwXvzza9pS8qE8ZHJk3CheHW9uucBn9ngW4C1gmmzpv").unwrap();
-//    let voucher_call = IssueVoucherCall::<subxt::DefaultNodeRuntime> {
-//        dest: &who.clone().into(),
-//        amount: 100,
-//    };
-//
-//    let assets_call = IssueCall::<subxt::DefaultNodeRuntime> {
-//        token_symbol: TokenSymbol::vEOS,
-//        target: &who.clone().into(),
-//        amount: 100,
-//    };
-//    let calls: Vec<Box<dyn subxt::Call<_>>> = vec![Box::new(voucher_call), Box::new(assets_call)];
-//    let calls: Vec<IssueCall<subxt::DefaultNodeRuntime>> = vec![assets_call];
-//    let calls: Vec<IssueCall<_>> = vec![assets_call];
-//
-//    let hash = batch_calls(calls.into_iter(), url, signer).await?;
-//    let json = utils::read_json_from_file(veos_issued)?;
-//    let veos: Vec<IssueVEOS> = serde_json::from_str(&json)?;
+    let db_path = concat!(env!("CARGO_MANIFEST_DIR"),"/sled/cross-chain");
+    let tree = sled::open(db_path).expect("failed to open sled db");
 
-//    let six_secs = time::Duration::from_secs(7);
-
-//    let mut i = 0u32;
-//    for v in veos.iter() {
-//        if v.balance <= 0.0f64 {
-//            continue
-//        }
-//        let to_be_issued = (v.balance * 10f64.powi(14i32)) as u128;
-//
-//        match assets::issue_assets(signer, url, &v.who, to_be_issued).await {
-//            Ok(hash) => {
-//                println!("{:?} reveived {:?} with hash: {:?}", &v.who.to_string(), to_be_issued, hash);
-//                i += 1;
-//            },
-//            Err(e) => println!("{:?} didn't reveive {:?} with error: {:?}", &v.who.to_string(), to_be_issued, e),
-//        }
-//
-//
-//        thread::sleep(six_secs);
-//    }
-//    println!("sent {:?} trades.", i);
-
-//    let target = AccountId32::from_str("5G9VdMwXvzza9pS8qE8ZHJk3CheHW9uucBn9ngW4C1gmmzpv").unwrap();
-//    let r = assets::issue_assets(signer, url, target, 1020 * 10u128.pow(12u32)).await;
-//    dbg!(r);
-    let schedule = "/Volumes/Bifrost/my-repo/bifrost-xt/src/data/producer_authority_schedule_v2-55.json";
-    let block_hash = producers_schedule::save_producer_schedule_call(signer, url, schedule).await?;
-//    let block_hash = producers_schedule::test_random_nonce().await?;
-    println!("block hash: {:?}", block_hash);
-
-//    let client = batch_trades::create_client(
-//        "wss://n1.testnet.liebi.com"
-////        "wss://n2.testnet.liebi.com"
-////        "wss://n3.testnet.liebi.com"
-////        "ws://n4.testnet.liebi.com:9944"
-////        "ws://n5.testnet.liebi.com:9944"
-//    ).await;
-
-//    let mut i: u32 = 0;
-//    loop {
-////        batch_trades::get_nonce(&client, "//bifrost-sudo").await?;
-//        batch_trades::get_nonce1("wss://n1.testnet.liebi.com", "//bifrost-sudo").await?;
-//        i += 1;
-//        if (i >= 1000) { break; }
-//    }
+    let r = crate::prove_action::prove_action_call(tree, signer, url).await;
+    println!("error happened while submit transaction: {:?}", r);
 
     Ok(())
 }
