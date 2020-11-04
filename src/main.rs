@@ -46,13 +46,16 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let url = "wss://n1.testnet.liebi.com";
     let signer = "//Alice";
 
-    // let url = "ws://127.0.0.1:9944";
-    // let signer = "//Alice";
+    let url = "ws://10.115.27.96:9944";
+    let signer = "//Alice";
 
     let db_path = concat!("/home","/sled/cross-chain");
 
-    let r = crate::prove_action::prove_action_call(db_path, signer, url).await;
-    println!("error happened while submit transaction: {:?}", r);
+    // let r = crate::prove_action::prove_action_call(db_path, signer, url).await;
+    // println!("error happened while submit transaction: {:?}", r);
+    let path = "/Volumes/Bifrost/my-repo/bifrost-xt/src/data/producer_authority_schedule_v2-67.json";
+    let r = crate::producers_schedule::save_producer_schedule_call(signer, url, path).await;
+    dbg!(r);
 
     Ok(())
 }
