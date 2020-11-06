@@ -15,25 +15,15 @@
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::error_types::Error as BifrostxtError;
-use codec::{Decode, Encode};
+use codec::Encode;
 use core::marker::PhantomData;
-use serde::{Deserialize, Serialize};
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
-	system::{AccountStoreExt, System, SystemEventsDecoder, SetCodeCall}, Encoded, Event, Store,
-	sudo::{Sudo, SudoEventsDecoder, SudoCall}
+	system::{System, SystemEventsDecoder, SetCodeCall}, Encoded,
+	sudo::{Sudo, SudoCall}
 };
 use sp_core::{sr25519::Pair, Pair as TraitPair};
-use sp_runtime::{AccountId32, traits::{AtLeast32Bit, MaybeSerialize, Member}};
 use std::error::Error;
-use frame_support::{
-	decl_module, decl_storage, decl_event, decl_error, IterableStorageMap,
-	dispatch::{Dispatchable, DispatchError, DispatchResult, Parameter},
-	traits::{Get, schedule::{self, DispatchTime}, OriginTrait, EnsureOrigin, IsType},
-	weights::{GetDispatchInfo, Weight},
-};
-use std::fs::File;
-use std::io::prelude::*;
 
 #[subxt::module]
 pub trait Scheduler: System {}

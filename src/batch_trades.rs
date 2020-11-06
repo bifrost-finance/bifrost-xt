@@ -16,27 +16,20 @@
 
 use crate::error_types::Error as BifrostxtError;
 use crate::utils::read_json_from_file;
-use codec::{Codec, Encode};
+use codec::{Decode, Encode};
 use core::marker::PhantomData;
-use eos_chain::ProducerAuthoritySchedule;
-use lazy_static::lazy_static;
-use once_cell::sync::OnceCell;
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
-	system::{AccountStoreExt, System, SystemEventsDecoder}, Encoded,
+	system::{AccountStoreExt, System, SystemEventsDecoder}, Encoded, Event,
 	sudo::{Sudo, SudoEventsDecoder, SudoCall}, balances, UncheckedExtrinsic,
 };
+use subxt::balances::BalancesEventsDecoder;
 use sp_core::{sr25519::Pair, Pair as TraitPair};
 use std::error::Error;
-use sp_keyring::{AccountKeyring};
-use frame_support::{
-	Parameter, traits::{OriginTrait, UnfilteredDispatchable},
-	weights::{Weight, GetDispatchInfo, DispatchClass}, dispatch::PostDispatchInfo,
-};
-use sp_runtime::{DispatchError, DispatchResult, traits::Dispatchable};
+use crate::voucher::*;
 
 #[subxt::module]
-pub trait Utility: System {}
+pub trait Utility: System + Voucher {}
 
 impl Utility for BifrostRuntime {}
 
@@ -46,18 +39,33 @@ pub struct BatchCall<T: Utility> {
 	pub _runtime: PhantomData<T>,
 }
 
-pub async fn batch_calls(calls: impl IntoIterator<Item=Encoded>, url: &str, signer: &str) -> Result<String, Box<dyn Error>> {
-	let signer = Pair::from_string(signer.as_ref(), None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
-	let signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+// pub struct BatchCompletedEvent<T: Utility>(PhantomData<T>);
+pub struct BatchCompletedEvent<T: Utility> {
+	pub _runtime: PhantomData<T>,
+}
 
-	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
-
+#[allow(dead_code)]
+pub async fn batch_calls(
+	calls: impl IntoIterator<Item=Encoded>, 
+	client: &Client<BifrostRuntime>, 
+	signer: &PairSigner::<BifrostRuntime, Pair>
+) -> Result<String, Box<dyn Error>> {
 	let batch_call = BatchCall::<BifrostRuntime> {
 		calls: calls.into_iter().collect(),
 		_runtime: PhantomData,
 	};
 
-	let block_hash = client.submit(batch_call, &signer).await?;
+	// let block_hash = client.submit(batch_call, signer).await?;
+
+	let extrinsic = client.create_signed(batch_call, signer).await?;
+
+	let mut decoder = client.events_decoder::<BatchCall<BifrostRuntime>>();
+	decoder.with_utility();
+
+	let batch_events = client.submit_and_watch_extrinsic(extrinsic, decoder).await?;
+	let event = batch_events.find_event::<BatchCompletedEvent::<BifrostRuntime>>()?.ok_or("No Event found or decoded.")?;
+	let block_hash = batch_events.block;
 
 	Ok(block_hash.to_string())
 }

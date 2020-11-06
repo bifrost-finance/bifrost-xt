@@ -81,6 +81,7 @@ pub struct ProveActionCall<T: BridgeEos> {
     pub _runtime:         PhantomData<T>,
 }
 
+#[allow(dead_code)]
 pub async fn prove_action_call(db_path: &str, signer: &str, url: &str) -> Result<(), BifrostXTErr> {
     let client: Client<BifrostRuntime> = subxt::ClientBuilder::new()
         .set_url(url)

@@ -2,18 +2,14 @@ use codec::{Decode, Encode};
 use crate::error_types::Error as BifrostxtError;
 use crate::utils::read_json_from_file;
 use core::marker::PhantomData;
-use eos_chain::ProducerAuthoritySchedule;
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
 	system::{AccountStoreExt, System, SystemEventsDecoder}, Encoded,
-	sudo::{Sudo, SudoEventsDecoder, SudoCall}, balances, Error as SubxtErr,
+	sudo::{Sudo, SudoEventsDecoder, SudoCall}, Error as SubxtErr,
 };
 use sp_core::{sr25519::Pair, Pair as TraitPair};
 use std::error::Error;
-use sp_keyring::{AccountKeyring};
-use sp_runtime::traits::{
-	Member, AtLeast32Bit, Saturating, One, Zero, MaybeSerialize, StaticLookup, MaybeSerializeDeserialize
-};
+use sp_runtime::traits::{Member, AtLeast32Bit, MaybeSerialize};
 use sp_runtime::AccountId32;
 
 #[derive(Encode, Decode, Clone, Copy, Eq, PartialEq, Debug)]
@@ -59,6 +55,7 @@ pub struct IssueCall<'a, T: Assets + Sudo> {
 	pub amount: <T as Assets>::Balance,
 }
 
+#[allow(dead_code)]
 pub fn issue<'a, T: Sudo>(call: &'a Encoded) -> SudoCall<T> {
 	SudoCall {
 		call,
@@ -66,6 +63,7 @@ pub fn issue<'a, T: Sudo>(call: &'a Encoded) -> SudoCall<T> {
 	}
 }
 
+#[allow(dead_code)]
 pub async fn issue_assets(
 	signer: &str,
 	url: &str,

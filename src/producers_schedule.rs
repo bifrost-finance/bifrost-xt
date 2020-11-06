@@ -22,11 +22,10 @@ use eos_chain::ProducerAuthoritySchedule;
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
 	system::{AccountStoreExt, System, SystemEventsDecoder}, Encoded,
-	sudo::{Sudo, SudoEventsDecoder, SudoCall}, balances
+	sudo::{Sudo, SudoEventsDecoder, SudoCall}
 };
 use sp_core::{sr25519::Pair, Pair as TraitPair};
 use std::error::Error;
-use sp_keyring::{AccountKeyring};
 
 #[subxt::module]
 pub trait BridgeEos: System + Sudo {}
@@ -68,63 +67,4 @@ pub async fn save_producer_schedule_call(signer: &str, url: &str, json_path: &st
 	let block_hash = client.submit(call, &signer).await?;
 
 	Ok(block_hash.to_string())
-}
-
-pub async fn test_random_nonce() -> Result<(), Box<dyn Error>> {
-	let mut signer = PairSigner::new(AccountKeyring::Alice.pair());
-	let dest = AccountKeyring::Bob.to_account_id().into();
-
-	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url("ws://127.0.0.1:9944").build().await?;
-
-	let nonce = client.account(&signer.signer().public().into(), None).await?.nonce;
-	println!("current nonce: {:?}", nonce);
-//	signer.set_nonce(nonce + 3);
-
-	client.submit(
-		balances::TransferCall {
-			to: &dest,
-			amount: 1234 * 10u128.pow(12u32),
-		},
-		&signer,
-	)
-	.await?;
-//	client.submit(
-//		balances::TransferCall {
-//			to: &dest,
-//			amount: 2234 * 10u128.pow(12u32),
-//		},
-//		&signer,
-//	)
-//		.await?;
-
-	// check that nonce is handled correctly
-//	signer.increment_nonce();
-//	let nonce = client.account(&signer.signer().public().into(), None).await?.nonce;
-//	println!("after trade nonce: {:?}", nonce);
-////	signer.set_nonce(nonce + 5);
-//	client.submit(
-//		balances::TransferCall {
-//			to: &dest,
-//			amount: 1000 * 10u128.pow(12u32),
-//		},
-//		&signer,
-//	)
-//	.await?;
-
-//	for i in 0..7 {
-//		let nonce = client.account(&signer.signer().public().into(), None).await?.nonce;
-//		signer.set_nonce(nonce+i);
-//		println!("after trade nonce: {:?}", nonce);
-//		client.submit(
-//			balances::TransferCall {
-//				to: &dest,
-//				amount: 500 * 10u128.pow(12u32),
-//			},
-//			&signer,
-//		)
-//		.await?;
-////		signer.increment_nonce();
-//	}
-
-	Ok(())
 }

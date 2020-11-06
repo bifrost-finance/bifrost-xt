@@ -75,33 +75,23 @@ pub struct IssuedVoucherEvent<T: Voucher> {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Vouchers {
-	#[serde(skip)]
-	pub nickname: String,
-	#[serde(skip)]
-	pub u_id: u32,
 	pub amount: String,
 	pub account: AccountId32,
 }
 
-#[derive(Clone, Debug)]
-#[derive(serde::Deserialize, serde::Serialize)]
-pub struct CC2Voucher {
-	#[serde(skip_serializing_if = "String::is_empty")]
-	pub address: String,
-	pub bnc: String,
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Reward {
+	pub account: String,
+	pub amount: f64,
 }
 
 #[allow(dead_code)]
-pub async fn issue_voucher_call(signer: &str, url: &str, voucher: &CC2Voucher, who: &AccountId32) -> Result<String, Box<dyn Error>> {
-	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
-
-	let signer = Pair::from_string(signer, None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
-	let mut signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
-
+pub async fn issue_voucher_call(signer: &PairSigner::<BifrostRuntime, Pair>, client: &Client<BifrostRuntime>, reward: &Reward, who: &AccountId32) -> Result<String, Box<dyn Error>> {
 	let nonce = client.account(&signer.signer().public().into(), None).await?.nonce;
 
 	let amount = {
-		let amount_f64 = voucher.bnc.parse::<f64>()?;
+		// let amount_f64 = reward.amount.parse::<f64>()?;
+		let amount_f64 = reward.amount;
 		(amount_f64 * 10f64.powi(12i32)) as u128
 	};
 
@@ -112,7 +102,7 @@ pub async fn issue_voucher_call(signer: &str, url: &str, voucher: &CC2Voucher, w
 	let proposal = client.encode(args)?;
 	let call = create_sudo_call(&proposal);
 
-	let extrinsic = client.create_signed(call, &signer).await?;
+	let extrinsic = client.create_signed(call, signer).await?;
 
 	let mut decoder = client.events_decoder::<IssueVoucherCall<BifrostRuntime>>();
 	decoder.with_voucher();
@@ -124,22 +114,18 @@ pub async fn issue_voucher_call(signer: &str, url: &str, voucher: &CC2Voucher, w
 	Ok(block_hash.to_string())
 }
 
+#[allow(dead_code)]
 pub async fn get_voucher_by_account(signer: &str, url: &str, who: &AccountId32) -> Result<u128, Box<dyn std::error::Error>> {
 	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
-
-	let signer = Pair::from_string(signer, None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
-	let mut signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
 
 	let voucher = client.balances_voucher(&who.clone().into(), None).await?;
 
 	Ok(voucher)
 }
 
+#[allow(dead_code)]
 pub async fn get_all_voucher(signer: &str, url: &str) -> Result<Vec<(AccountId32, u128)>, Box<dyn std::error::Error>> {
 	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
-
-	let signer = Pair::from_string(signer, None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
-	let mut signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
 
 	// None means get all of the storage
 	let mut iter = client.balances_voucher_iter(None).await?;
@@ -155,4 +141,23 @@ pub async fn get_all_voucher(signer: &str, url: &str) -> Result<Vec<(AccountId32
 
 	Ok(all_vouchers)
 
+}
+
+#[allow(dead_code)]
+pub fn create_encoded_call(client: &Client<BifrostRuntime>, reward: &Reward, who: &AccountId32) -> Result<Encoded, Box<dyn Error>> {
+	let amount = {
+		// let amount_f64 = reward.amount.parse::<f64>()?;
+		let amount_f64 = reward.amount;
+		(amount_f64 * 10f64.powi(12i32)) as u128
+	};
+
+	let args = IssueVoucherCall {
+		dest: &who.clone().into(),
+		amount,
+	};
+	let proposal = client.encode(args)?;
+	let call = create_sudo_call(&proposal);
+	let encoded_call = client.encode(call)?;
+
+	Ok(encoded_call)
 }
