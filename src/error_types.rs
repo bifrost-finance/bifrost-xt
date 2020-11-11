@@ -19,7 +19,6 @@ use std::{
 	error,
 };
 
-
 #[derive(Clone, Debug)]
 pub enum Error {
 	WrongSudoSeed,

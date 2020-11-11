@@ -22,4 +22,3 @@ tokio = { version = "0.3.3", features = ["macros", "rt-multi-thread"] }
 
 [profile.release]
 opt-level = 3 # 3
-debug = false # false

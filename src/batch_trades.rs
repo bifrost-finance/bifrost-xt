@@ -40,7 +40,6 @@ pub struct BatchCall<T: Utility> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
-// pub struct BatchCompletedEvent<T: Utility>(PhantomData<T>);
 pub struct BatchCompletedEvent<T: Utility> {
 	pub _runtime: PhantomData<T>,
 }
