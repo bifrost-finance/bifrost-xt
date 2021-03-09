@@ -26,6 +26,8 @@ use subxt::{
 use sp_core::{sr25519::Pair, Pair as TraitPair};
 use sp_runtime::{AccountId32, traits::{AtLeast32Bit, MaybeSerialize, Member}};
 use std::error::Error;
+use std::str::FromStr;
+use crate::utils::write_json_to_file;
 
 #[subxt::module]
 pub trait Voucher: System + Sudo {
@@ -85,6 +87,13 @@ pub struct Reward {
 	pub amount: f64,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct BNCReward {
+	pub ethAddr: String,
+	pub bifrostAddr: String,
+	pub rewards: String,
+}
+
 #[allow(dead_code)]
 pub async fn issue_voucher_call(signer: &PairSigner::<BifrostRuntime, Pair>, client: &Client<BifrostRuntime>, reward: &Reward, who: &AccountId32) -> Result<String, Box<dyn Error>> {
 	let nonce = client.account(&signer.signer().public().into(), None).await?.nonce;
@@ -124,20 +133,25 @@ pub async fn get_voucher_by_account(signer: &str, url: &str, who: &AccountId32) 
 }
 
 #[allow(dead_code)]
-pub async fn get_all_voucher(signer: &str, url: &str) -> Result<Vec<(AccountId32, u128)>, Box<dyn std::error::Error>> {
+pub async fn get_all_voucher(url: &str) -> Result<Vec<(AccountId32, String)>, Box<dyn std::error::Error>> {
 	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
 
 	// None means get all of the storage
 	let mut iter = client.balances_voucher_iter(None).await?;
 
-	let mut all_vouchers: Vec<(AccountId32, u128)> = vec![];
+	let mut all_vouchers: Vec<(AccountId32, String)> = vec![];
 	while let Some((key, val)) = iter.next().await? {
-		println!("{:?}: {}", key.0, val);
-		println!("{:?}: {}", key.0.len(), val);
-		let who = serde_json::from_slice(key.0.as_slice())?;
-		let voucher = (who, val);
+		let acco = hex::encode(&key.0[48..]);
+		let who = AccountId32::from_str(&acco)?;
+		let voucher = (who, val.to_string());
 		all_vouchers.push(voucher);
 	}
+
+	let json_str = serde_json::to_string(&all_vouchers)?;
+	let path = "/home/bifrost/jdeng/bifrost-xt/bnc_vouchers.json";
+	write_json_to_file(&json_str, path)?;
+
+	println!("how many users: {:?}", all_vouchers.len());
 
 	Ok(all_vouchers)
 
