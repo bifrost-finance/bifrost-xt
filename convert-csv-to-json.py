@@ -23,10 +23,10 @@ def convert_excel_to_json(excel_path, json_path=None):
     rewards = []
     sums  = 0
     length = 0
-    index = 1
+    index = 0
     for i in range(1, sheet.nrows):
         item = sheet.row_values(i)
-        print("acmount: ", item)
+        print("amount: ", item)
         account = item[index]
         # print("account: ", account, ", amount: ", float(item[2]))
         try:
@@ -34,9 +34,9 @@ def convert_excel_to_json(excel_path, json_path=None):
             amount = float(amount_str)
         # amount = float(item[1])
         except:
-            print("acmount: ", item[index + 1])
+            print("amount: ", item[index + 1])
             amount = item[index + 1]
-            print("acmount: ", amount)
+            print("amount: ", amount)
         reward = {
             "account": account,
             "amount": amount
@@ -52,8 +52,8 @@ def convert_excel_to_json(excel_path, json_path=None):
 
 
 if __name__ == "__main__":
-    excel_path = "/home/bifrost/jdeng/bifrost-xt/2021-02-26/2.8 DeFiGo ama 活动发奖.xlsx"
-    convert_excel_to_json(excel_path, "/home/bifrost/jdeng/bifrost-xt/2021-02-26/2.8 DeFiGo ama 活动发奖.xlsx.json")
+    excel_path = "/home/bifrost/jdeng/bifrost-xt/3.3 Polkawarriors 问答及Quiz 奖励.xlsx"
+    convert_excel_to_json(excel_path, "/home/bifrost/jdeng/bifrost-xt/3.3 Polkawarriors 问答及Quiz 奖励.json")
 
 '''
 Sumary

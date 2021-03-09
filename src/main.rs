@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
 
+#![allow(dead_code)]
+
 mod error_types;
 mod producers_schedule;
 mod voucher;
@@ -25,17 +27,14 @@ mod balances;
 // mod prove_action;
 
 use std::error::Error;
-use std::str::FromStr;
 use sp_runtime::AccountId32;
-use crate::voucher::{issue_voucher_call, Reward, create_encoded_call, BNCReward};
-use crate::voucher::IssueVoucherCall;
+use crate::voucher::{issue_voucher_call, Reward, create_encoded_call};
 use crate::batch_trades::batch_calls;
 use crate::utils::{read_json_from_file, write_json_to_file};
 use crate::error_types::Error as BifrostxtError;
-use subxt::{PairSigner, DefaultNodeRuntime as BifrostRuntime, Client, Encoded};
+use subxt::{PairSigner, DefaultNodeRuntime as BifrostRuntime, Client};
 use sp_core::{sr25519::Pair, Pair as TraitPair};
 use sp_core::crypto::Ss58Codec;
-use walkdir::WalkDir;
 
 use std::{thread, time};
 
@@ -109,10 +108,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // dbg!(n);
     // lwt t = 3_901_659_588_683_099_205u128;
     // let _ = 3_901_659_588_683u128;
-    let url = "ws://150.109.194.40:9944";
+    // let url = "ws://150.109.194.40:9944";
+    let url = "ws://10.115.27.96:9988";
     let signer = "//Alice";
 
-    let _ = crate::voucher::get_all_voucher(url).await?;
+    // let _ = crate::voucher::get_all_voucher(url).await?;
+
+    // return Ok(());
 
     // let schedule_path = "/home/bifrost/jdeng/bifrost-xt/2021-02-26/2.8 DeFiGo ama 活动发奖.xlsx.json";
     // let block = producers_schedule::save_producer_schedule_call(signer, url, schedule_path).await;
@@ -128,19 +130,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // let rewards_path = "/home/bifrost/jdeng/bifrost-xt/bifrost 抹茶中奖用户名单_2020-10-21(1)(1).json";
     // let rewards_path = "/home/bifrost/jdeng/bifrost-xt/11.5 BML & Bifrost 直播活动发奖.json";
     // let rewards_path = "/home/bifrost/jdeng/bifrost-xt/11.5 BML & Bifrost 直播活动发奖-tcp-closed.json";
-    let rewards_path = "/home/bifrost/jdeng/bifrost-xt/veth-2-21.json";
+    let rewards_path = "/home/bifrost/jdeng/bifrost-xt/3.3 Polkawarriors 问答及Quiz 奖励.json";
     let json_content = read_json_from_file(rewards_path)?;
     let rewards: Vec<Reward> = serde_json::from_str(&json_content)?;
 
-    let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
+    let client: Client<BifrostRuntime> = subxt::ClientBuilder::new()
+        .set_url(url)
+        .skip_type_sizes_check()
+        .build().await?;
+    dbg!(2222);
 
-    let batch_size = 300usize;
-    let times = rewards.len() / batch_size;
+    let batch_size = 8;
+    // let times = rewards.len() / batch_size;
     let mut sum = 0.0f64;
     println!("{}", rewards.len());
     let mut unissued = vec![];
     for (index, _) in rewards.iter().step_by(batch_size).enumerate() {
-        break;
+        // break;
         let range = { 
             println!("{}", index);
             if rewards.len() - batch_size * index <= batch_size {

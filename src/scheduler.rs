@@ -19,7 +19,7 @@ use codec::Encode;
 use core::marker::PhantomData;
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
-	system::{System, SystemEventsDecoder, SetCodeCall}, Encoded,
+	system::{System, SetCodeCall}, Encoded,
 	sudo::{Sudo, SudoCall}
 };
 use sp_core::{sr25519::Pair, Pair as TraitPair};
@@ -51,7 +51,10 @@ pub async fn upgrade_runtime(signer: &str, url: &str) -> Result<String, Box<dyn 
 	let signer = Pair::from_string(signer.as_ref(), None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
 	let signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
 
-	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
+	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new()
+		.set_url(url)
+		.skip_type_sizes_check()
+		.build().await?;
 
 	// let wasm = include_bytes!("/Users/liebi/node_runtime.compact.wasm");
 	let wasm = b"123";

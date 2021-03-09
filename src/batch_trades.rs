@@ -14,17 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::error_types::Error as BifrostxtError;
-use crate::utils::read_json_from_file;
 use codec::{Decode, Encode};
 use core::marker::PhantomData;
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
-	system::{AccountStoreExt, System, SystemEventsDecoder}, Encoded, Event,
-	sudo::{Sudo, SudoEventsDecoder, SudoCall}, balances, UncheckedExtrinsic,
+	system::System, Encoded, Event,
 };
-use subxt::balances::BalancesEventsDecoder;
-use sp_core::{sr25519::Pair, Pair as TraitPair};
+use sp_core::{sr25519::Pair};
 use std::error::Error;
 use crate::voucher::*;
 
@@ -55,15 +51,13 @@ pub async fn batch_calls(
 		_runtime: PhantomData,
 	};
 
-	// let block_hash = client.submit(batch_call, signer).await?;
-
+	dbg!(55);
 	let extrinsic = client.create_signed(batch_call, signer).await?;
-
-	let mut decoder = client.events_decoder::<BatchCall<BifrostRuntime>>();
-	decoder.with_utility();
-
-	let batch_events = client.submit_and_watch_extrinsic(extrinsic, decoder).await?;
-	let event = batch_events.find_event::<BatchCompletedEvent::<BifrostRuntime>>()?.ok_or("No Event found or decoded.")?;
+	dbg!(33);
+	
+	let batch_events = client.submit_and_watch_extrinsic(extrinsic).await?;
+	dbg!(44);
+	// let event = batch_events.find_event::<BatchCompletedEvent::<BifrostRuntime>>()?.ok_or("No Event found or decoded.")?;
 	let block_hash = batch_events.block;
 
 	Ok(block_hash.to_string())

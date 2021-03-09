@@ -14,16 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::error_types::Error as BifrostxtError;
 use codec::{Decode, Encode};
 use core::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
-	system::{AccountStoreExt, System, SystemEventsDecoder}, Encoded, Event, Store,
-	sudo::{Sudo, SudoEventsDecoder, SudoCall}
+	system::System, Encoded, Event, Store, sudo::{Sudo, SudoCall}
 };
-use sp_core::{sr25519::Pair, Pair as TraitPair};
+use sp_core::sr25519::Pair;
 use sp_runtime::{AccountId32, traits::{AtLeast32Bit, MaybeSerialize, Member}};
 use std::error::Error;
 use std::str::FromStr;
@@ -87,16 +85,9 @@ pub struct Reward {
 	pub amount: f64,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct BNCReward {
-	pub ethAddr: String,
-	pub bifrostAddr: String,
-	pub rewards: String,
-}
-
 #[allow(dead_code)]
 pub async fn issue_voucher_call(signer: &PairSigner::<BifrostRuntime, Pair>, client: &Client<BifrostRuntime>, reward: &Reward, who: &AccountId32) -> Result<String, Box<dyn Error>> {
-	let nonce = client.account(&signer.signer().public().into(), None).await?.nonce;
+	// let nonce = client.account(&signer.signer().public().into(), None).await?.nonce;
 
 	let amount = {
 		// let amount_f64 = reward.amount.parse::<f64>()?;
@@ -113,19 +104,23 @@ pub async fn issue_voucher_call(signer: &PairSigner::<BifrostRuntime, Pair>, cli
 
 	let extrinsic = client.create_signed(call, signer).await?;
 
-	let mut decoder = client.events_decoder::<IssueVoucherCall<BifrostRuntime>>();
-	decoder.with_voucher();
+	let voucher_events = client.submit_and_watch_extrinsic(extrinsic).await?;
+	let IssuedVoucherEvent { to, amount } = voucher_events
+		.find_event::<IssuedVoucherEvent::<BifrostRuntime>>()?
+		.ok_or("No Event found or decoded.")?;
+	println!("Issued {} token for {}", amount, to);
 
-	let voucher_events = client.submit_and_watch_extrinsic(extrinsic, decoder).await?;
-	let event = voucher_events.find_event::<IssuedVoucherEvent::<BifrostRuntime>>()?.ok_or("No Event found or decoded.")?;
 	let block_hash = voucher_events.block;
 
 	Ok(block_hash.to_string())
 }
 
 #[allow(dead_code)]
-pub async fn get_voucher_by_account(signer: &str, url: &str, who: &AccountId32) -> Result<u128, Box<dyn std::error::Error>> {
-	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
+pub async fn get_voucher_by_account(url: &str, who: &AccountId32) -> Result<u128, Box<dyn std::error::Error>> {
+	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new()
+		.set_url(url)
+		.skip_type_sizes_check()
+		.build().await?;
 
 	let voucher = client.balances_voucher(&who.clone().into(), None).await?;
 
@@ -134,7 +129,10 @@ pub async fn get_voucher_by_account(signer: &str, url: &str, who: &AccountId32) 
 
 #[allow(dead_code)]
 pub async fn get_all_voucher(url: &str) -> Result<Vec<(AccountId32, String)>, Box<dyn std::error::Error>> {
-	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
+	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new()
+		.set_url(url)
+		.skip_type_sizes_check()
+		.build().await?;
 
 	// None means get all of the storage
 	let mut iter = client.balances_voucher_iter(None).await?;
@@ -148,7 +146,7 @@ pub async fn get_all_voucher(url: &str) -> Result<Vec<(AccountId32, String)>, Bo
 	}
 
 	let json_str = serde_json::to_string(&all_vouchers)?;
-	let path = "/home/bifrost/jdeng/bifrost-xt/bnc_vouchers.json";
+	let path = "/home/bifrost/jdeng/bifrost-xt/bnc_vouchers-local.json";
 	write_json_to_file(&json_str, path)?;
 
 	println!("how many users: {:?}", all_vouchers.len());

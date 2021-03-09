@@ -16,12 +16,10 @@
 
 use codec::{Decode, Encode};
 use crate::error_types::Error as BifrostxtError;
-use crate::utils::read_json_from_file;
 use core::marker::PhantomData;
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
-	system::{AccountStoreExt, System, SystemEventsDecoder}, Encoded,
-	sudo::{Sudo, SudoEventsDecoder, SudoCall}, Error as SubxtErr,
+	system::System, Encoded, sudo::{Sudo, SudoCall}, Error as SubxtErr,
 };
 use sp_core::{sr25519::Pair, Pair as TraitPair};
 use std::error::Error;
@@ -59,6 +57,7 @@ pub trait Assets: System + Sudo {
 	+ std::fmt::Debug
 	+ From<<Self as System>::BlockNumber>;
 }
+
 impl Assets for BifrostRuntime {
 	type Balance = u128;
 }
@@ -89,7 +88,10 @@ pub async fn issue_assets(
 	let signer = Pair::from_string(signer.as_ref(), None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
 	let signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
 
-	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
+	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new()
+		.set_url(url)
+		.skip_type_sizes_check()
+		.build().await?;
 
 	let args = IssueCall {
 		token_symbol: TokenSymbol::aUSD,

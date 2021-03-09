@@ -21,8 +21,7 @@ use core::marker::PhantomData;
 use eos_chain::ProducerAuthoritySchedule;
 use subxt::{
 	PairSigner, DefaultNodeRuntime as BifrostRuntime, Call, Client,
-	system::{AccountStoreExt, System, SystemEventsDecoder}, Encoded,
-	sudo::{Sudo, SudoEventsDecoder, SudoCall}
+	system::System, Encoded, sudo::{Sudo, SudoCall}
 };
 use sp_core::{sr25519::Pair, Pair as TraitPair};
 use std::error::Error;
@@ -54,7 +53,10 @@ pub async fn save_producer_schedule_call(signer: &str, url: &str, json_path: &st
 	let signer = Pair::from_string(signer.as_ref(), None).map_err(|_| BifrostxtError::WrongSudoSeed)?;
 	let signer = PairSigner::<BifrostRuntime, Pair>::new(signer);
 
-	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new().set_url(url).build().await?;
+	let client: Client<BifrostRuntime> = subxt::ClientBuilder::new()
+		.set_url(url)
+		.skip_type_sizes_check()
+		.build().await?;
 
 	let args = SaveProducerScheduleCall {
 		ps,
